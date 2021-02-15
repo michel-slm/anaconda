@@ -753,6 +753,11 @@ class FSSet(object):
             else:
                 mountpoint = device.format.mountpoint
                 options = device.format.options
+                if fstype == "btrfs":
+                    if not "compress" in options:
+                        opts = set(options.split(","))
+                        opts.add("compress=zstd:1")
+                        options = ",".join(opts)
                 if not mountpoint:
                     log.warning("%s filesystem on %s has no mount point",
                                 fstype,
