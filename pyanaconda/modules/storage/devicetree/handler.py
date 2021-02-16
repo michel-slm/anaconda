@@ -91,6 +91,11 @@ class DeviceTreeHandler(ABC):
         :raise: MountFilesystemError if mount fails
         """
         device = self._get_device(device_name)
+        if device.format.type == "btrfs":
+            if not "compress" in options:
+                opts = set(options.split(","))
+                opts.add("compress=zstd:1")
+                options = ",".join(opts)
         try:
             device.format.mount(mountpoint=mount_point, options=options or None)
         except FSError as e:
