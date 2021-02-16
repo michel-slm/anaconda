@@ -157,7 +157,13 @@ class DeviceTreeHandler(ABC):
         :return: a string with options
         """
         device = self._get_device(device_name)
-        return device.format.options or ""
+        if device.format.type == "btrfs":
+            if not "compress" in device.format.options:
+                opts = set(device.format.options.split(","))
+                opts.add("compress=zstd:1")
+                opts = ",".join(opts)
+
+        return opts or ""
 
     def set_device_mount_options(self, device_name, mount_options):
         """Set mount options of the specified device.
@@ -170,6 +176,11 @@ class DeviceTreeHandler(ABC):
         :param mount_options: a string with options
         """
         device = self._get_device(device_name)
+        # if device.format.type == "btrfs":
+        #     if not "compress" in mount_options:
+        #         opts = set(mount_options.split(","))
+        #         opts.add("compress=zstd:1")
+        #         mount_options = ",".join(opts)
         device.format.options = mount_options or None
         log.debug("Mount options of %s are set to '%s'.", device_name, mount_options)
 
